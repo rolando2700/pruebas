@@ -13,7 +13,7 @@ function FormConsulta(){
       const response = await fetch(URL_base + "publicaciones/" + id);
       try{
         const data = await response.json();
-        document.getElementById("tabBody").innerHTML += "<tr><td>" + data.id + "</td><td>" + data.titulo +
+        document.getElementById("tabBody").innerHTML = "<tr><td>" + data.id + "</td><td>" + data.titulo +
           "</td><td>" + data.contenido + "</td><td>" + data.autor + "</td></tr>";
         console.log(data); 
       } catch(error) {
@@ -23,6 +23,7 @@ function FormConsulta(){
     } else {
       const response = await fetch(URL_base + "publicaciones");
       const data = await response.json();
+      document.getElementById("tabBody").innerHTML = "";
       for(let i in data){
         let item = data[i];
         document.getElementById("tabBody").innerHTML += "<tr><td>" + item.id + "</td><td>" + item.titulo +

@@ -1,11 +1,16 @@
 
 import express from "express";
 import cors from "cors";
+import bodyParser from "body-parser";
 
 const app = express();
 const port = 3080;
 
 app.use(cors());
+app.use(express.json());
+app.use(bodyParser.urlencoded({
+    extended: true
+}))
 
 function crearPublicacion(id, titulo, contenido, autor){
     return{
