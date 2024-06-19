@@ -1,7 +1,9 @@
-
 import express from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
+import { sequelize } from "./database/database.js";
+import { Usuario } from "./models/Usuario.js";
+
 
 const app = express();
 const port = 3080;
@@ -11,6 +13,16 @@ app.use(express.json());
 app.use(bodyParser.urlencoded({
     extended: true
 }))
+
+async function verificarConexion(){
+    try{
+        await sequelize.authenticate();
+        console.log("Conexion satisfactoria con la BD");
+        await sequelize.sync();
+    } catch(error) {
+        console.error("No se puede conectar a la BD", error);
+    }
+}
 
 function crearPublicacion(id, titulo, contenido, autor){
     return{
@@ -41,6 +53,45 @@ app.get("/publicaciones/:id", function(req, res) {
         res.status(404).send("publicacion no encontrada");
     }
 
+})
+
+app.get("/usuarios", async function(req, res) {
+    const listUsuarios = await Usuario.findAll();
+    res.json(listUsuarios);
+})
+
+app.post("/usuarios", async function(req, res) {
+    const data = req.body;
+    if(data.codigo && data.nombre && data.edad){
+        const usuarioCreado = await Usuario.create({
+            codigo: data.codigo,
+            nombre: data.nombre,
+            edad: data.edad
+        });
+        res.status(201).json(usuarioCreado);
+    } else {
+        res.status(404).send("Faltan datos");
+    };
+})
+
+app.put("/usuarios/:id", async function(req, res) {
+    const id = req.params.id;
+    const data = req.body;
+
+    if(data.codigo && data.nombre && data.edad){
+        const usuarioModificado = await Usuario.update({
+            codigo: data.codigo,
+            nombre: data.nombre,
+            edad: data.edad,
+        }, {
+            where: {
+                id: id
+            }
+        });
+        res.json(usuarioModificado)
+    } else {
+        res.status(400).send('Faltan datos');
+    }
 })
 
 app.post("/publicaciones", function(req, res) {
@@ -99,6 +150,7 @@ app.get("/publicaciones-url", function(req, res) {
 
 app.listen(port, function(){
     console.log("Servidor escuchando en puerto " + port);
+    verificarConexion();
 })
 
 

@@ -11,11 +11,12 @@ function FormConsulta(){
     
     if(id.length > 0){
       const response = await fetch(URL_base + "publicaciones/" + id);
-      try{
+      try{  
         const data = await response.json();
         document.getElementById("tabBody").innerHTML = "<tr><td>" + data.id + "</td><td>" + data.titulo +
           "</td><td>" + data.contenido + "</td><td>" + data.autor + "</td></tr>";
         console.log(data); 
+        
       } catch(error) {
         console.log("error");
       }
