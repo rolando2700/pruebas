@@ -3,6 +3,9 @@ import cors from "cors";
 import bodyParser from "body-parser";
 import { sequelize } from "./database/database.js";
 import { Usuario } from "./models/Usuario.js";
+import { Proyecto } from "./models/Proyecto.js";
+import { Tarea } from "./models/Tarea.js";
+import { Autor } from "./models/Autor.js";
 
 
 const app = express();
@@ -18,7 +21,7 @@ async function verificarConexion(){
     try{
         await sequelize.authenticate();
         console.log("Conexion satisfactoria con la BD");
-        await sequelize.sync();
+        await sequelize.sync({force: true});
     } catch(error) {
         console.error("No se puede conectar a la BD", error);
     }
@@ -74,6 +77,21 @@ app.post("/usuarios", async function(req, res) {
     };
 })
 
+app.delete("/usuarios/:id", async function(req, res) {
+    const id = req.params.id;
+    try {
+        await Usuario.destroy({
+            where: {
+                id: id,
+            }
+        })
+        res.send("usuario eliminado");
+    } catch(error) {
+        console.log("Ocurrio error: ", error);
+        res.status(400).send("ocurrio un error");
+    }
+})
+
 app.put("/usuarios/:id", async function(req, res) {
     const id = req.params.id;
     const data = req.body;
@@ -91,6 +109,59 @@ app.put("/usuarios/:id", async function(req, res) {
         res.json(usuarioModificado)
     } else {
         res.status(400).send('Faltan datos');
+    }
+})
+
+app.post("/proyecto", async function(req, res) {
+    const data = req.body;
+
+    if(data.nombre){
+        const proyCreado = await Proyecto.create({
+            nombre: data.nombre,
+            encargado: data.encargado,
+            descripcion: data.descripcion
+        })
+        res.json(proyCreado);
+    } else {
+        res.status(400).send("Faltan datos");
+    }    
+})
+
+app.post("/proyecto/:id/tarea", async function(req, res) {
+    const data = req.body;
+    const idProy = req.params.id;
+
+    const tareaCreada = await Tarea.create({
+        nombre: data.nombre
+    })
+
+    const proyecto = await Proyecto.findOne({where: {
+        id: idProy
+    }})
+
+    await proyecto.addTarea(tareaCreada);
+    const result = await Tarea.findOne({
+        where: {
+            id: tareaCreada.id,
+        }
+    })
+
+    res.status(201).json(tareaCreada);
+})
+
+app.get("/proyecto/:id", async function(req, res) {
+    const idProy = req.params.id;
+    try{
+        const data = await Proyecto.findOne({
+            where: {
+                id: idProy
+            },
+            include: Tarea
+        });
+    
+        res.status(201).json(data);
+    } catch(error) {
+        res.status(404).send("Hubo un error em la BD");
     }
 })
 

@@ -54,10 +54,36 @@ function FormConsulta(){
   )
 }
 
+function FormRegistro() {
+
+  async function handleClick(){
+    const URL_base = "http://localhost:3080/";
+    const response = await fetch(URL_base + "publicaciones", {
+      method: "POST",
+      body: JSON.stringify({
+        titulo: document.getElementById("titulo").value,
+        contenido: document.getElementById("contenido").value,
+        autor: document.getElementById("autor").value
+      }),
+      headers: {
+        'Content-type': 'application/json'
+      }
+    });
+    console.log(response);
+  }
+
+  return(<form>
+    <input name="titulo" id="titulo" placeholder="titulo"></input><br></br>
+    <input name="contenido" id="contenido" placeholder="contenido"></input><br></br>
+    <input name="autor" id="autor" placeholder="autor"></input><br></br>
+    <button type="button" onClick={handleClick}>Guardar</button>
+  </form>);
+}
+
 function App() {
   return (
     <>
-    <FormConsulta></FormConsulta>
+    <FormRegistro></FormRegistro>
     </>
   );
 }
